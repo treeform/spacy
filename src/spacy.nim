@@ -39,14 +39,13 @@ iterator findInRangeApprox*(bs: BruteSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry but does not cull them.
   ## Useful if you need distance anyways and will compute other computations.
   for thing in bs.list:
-    if e.id != thing.id:
-      yield thing
+    yield thing
 
 iterator findInRange*(bs: BruteSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry.
   let radiusSq = radius * radius
   for thing in bs.findInRangeApprox(e, radius):
-    if e.pos.distSq(thing.pos) < radiusSq:
+    if e.id != thing.id and e.pos.distSq(thing.pos) < radiusSq:
       yield thing
 
 type SortSpace* = ref object
@@ -115,7 +114,7 @@ iterator findInRange*(ss: SortSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry.
   let radiusSq = radius * radius
   for thing in ss.findInRangeApprox(e, radius):
-    if e.pos.distSq(thing.pos) < radiusSq:
+    if e.id != thing.id and e.pos.distSq(thing.pos) < radiusSq:
       yield thing
 
 type HashSpace* = ref object
@@ -191,7 +190,7 @@ iterator findInRange*(hs: HashSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry.
   let radiusSq = radius * radius
   for thing in hs.findInRangeApprox(e, radius):
-    if e.pos.distSq(thing.pos) < radiusSq:
+    if e.id != thing.id and e.pos.distSq(thing.pos) < radiusSq:
       yield thing
 
 type
@@ -323,7 +322,7 @@ iterator findInRange*(qs: QuadSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry.
   let radiusSq = radius * radius
   for thing in qs.findInRangeApprox(e, radius):
-    if e.pos.distSq(thing.pos) < radiusSq:
+    if e.id != thing.id and e.pos.distSq(thing.pos) < radiusSq:
       yield thing
 
 type
@@ -437,5 +436,5 @@ iterator findInRange*(ks: KdSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry.
   let radiusSq = radius * radius
   for thing in ks.findInRangeApprox(e, radius):
-    if e.pos.distSq(thing.pos) < radiusSq:
+    if e.id != thing.id and e.pos.distSq(thing.pos) < radiusSq:
       yield thing
