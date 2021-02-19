@@ -13,7 +13,7 @@ QuadSpace .......................... 0.185 ms      0.195 ms    ±0.010   x100
 KdSpace ............................ 0.519 ms      0.548 ms    ±0.037   x100
 ```
 
-You would usually pick the best one for your usecase by profiling and tuning. There is a cost to generating each space, you need to make sure it justifies the lookup time savings.
+You would usually pick the best one for your use case by profiling and tuning. There is a cost to generating each space, you need to make sure it justifies the lookup time savings.
 
 # BruteSpace
 
@@ -21,7 +21,7 @@ BruteSpace is basically a brute force algorithm that takes every inserted elemen
 
 ![examples/BruteSpace.png](examples/BruteSpace.png)
 
-The BruteSpace is faster is when there are like less elements in the space or you don't do many look ups. It’s a good baseline space that enables you to see how slow things actually can be. Don't discount it! Linear scans are pretty fast when you are just zipping through memory. Brute force might be all you need!
+The BruteSpace is faster is when there are less elements in the space or you don't do many look ups. It’s a good baseline space that enables you to see how slow things actually can be. Don't discount it! Linear scans are pretty fast when you are just zipping through memory. Brute force might be all you need!
 
 # SortSpace
 
@@ -35,7 +35,7 @@ SortSpace draws its power from the underlying sorting algorithm n×log(n) nature
 
 # HashSpace
 
-HashSpace is a little more complex than SortSpace but it’s still pretty simple. Instead of drawing the power from a sorting algorithm it draws its power from hashtables. HashSpace has a resolution and every entry going in is put into a grid-bucket. To check for surrounding entries you simply look up closest grid buckets and then loop through their entries.
+HashSpace is a little more complex than SortSpace but it’s still pretty simple. Instead of drawing the power from a sorting algorithm it draws its power from hash tables. HashSpace has a resolution and every entry going in is put into a grid-bucket. To check for surrounding entries you simply look up closest grid buckets and then loop through their entries.
 
 ![examples/HashSpace.png](examples/HashSpace.png)
 
