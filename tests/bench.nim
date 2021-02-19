@@ -35,7 +35,7 @@ for num in [10, 100, 1000]:
   # testSetup(num, "QuadSpace", newQuadSpace(rect(-1.0, -1.0, 1.0, 1.0)))
   # testSetup(num, "KdSpace", newKdSpace(rect(-1.0, -1.0, 1.0, 1.0)))
 
-  for dist in [0.01, 0.25, 1.00]:
+  for dist in [0.001, 0.1, 1.00]:
     echo num, " entries at ", dist, " distance:"
     testScan(num, dist, "BruteSpace", newBruteSpace())
     testScan(num, dist, "SortSpace", newSortSpace())

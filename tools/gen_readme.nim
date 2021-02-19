@@ -11,25 +11,30 @@ proc drawInternal(image: Image, ss: SortSpace, at: Entry) =
     rgba(255, 255, 255, 25).toPremultipliedAlpha()
   )
 
-proc drawInternal(image: Image, qs: QuadSpace, at: Entry) =
-  for node in qs.nodes:
+proc drawInternal(image: Image, qn: QuadNode, at: Entry) =
+  for node in qn.nodes:
     let b = node.bounds
     if node.nodes.len == 0 and overlaps(circle(at.pos, radius), b):
       image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
     else:
       image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+    image.drawInternal(node, at)
+
+proc drawInternal(image: Image, qs: QuadSpace, at: Entry) =
+  image.drawInternal(qs.root, at)
+
+proc drawInternal(image: Image, kn: KdNode, at: Entry) =
+  for node in kn.nodes:
+    let b = node.bounds
+    if node.nodes.len == 0 and overlaps(circle(at.pos, radius), b):
+      image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+    else:
+      image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+
     image.drawInternal(node, at)
 
 proc drawInternal(image: Image, ks: KdSpace, at: Entry) =
-  for node in ks.nodes:
-    let b = node.bounds
-
-    if node.nodes.len == 0 and overlaps(circle(at.pos, radius), b):
-      image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
-    else:
-      image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
-
-    image.drawInternal(node, at)
+  image.drawInternal(ks.root, at)
 
 proc drawInternal(image: Image, hs: HashSpace, at: Entry) =
   let r = hs.resolution

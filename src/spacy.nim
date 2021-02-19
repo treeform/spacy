@@ -210,25 +210,35 @@ proc len*(hs: HashSpace): int {.inline.} =
   for list in hs.hash.values:
     result += list.len
 
-const maxThings = 10
-const maxLevels = 7
+type
+  QuadSpace* = ref object
+    ## QuadTree, divide each node down if there is many elements.
+    ## Supposed to be for large amount of entries.
+    root*: QuadNode
+    maxThings*: int # when should node divide
+    maxLevels*: int # how many levels should node build
 
-type QuadSpace* = ref object
-  ## QuadTree, divide each node down if there is many elements.
-  ## Supposed to be for large amount of entries.
-  things*: seq[Entry]
-  nodes*: seq[QuadSpace]
-  bounds*: Rect
-  level*: int
+  QuadNode* = ref object
+    things*: seq[Entry]
+    nodes*: seq[QuadNode]
+    bounds*: Rect
+    level*: int
 
-proc newQuadSpace*(bounds: Rect, level: int = 0): QuadSpace =
-  result = QuadSpace()
+proc newQuadNode(bounds: Rect, level: int): QuadNode =
+  result = QuadNode()
   result.bounds = bounds
   result.level = level
 
-proc insert*(qs: QuadSpace, e: Entry)
+proc newQuadSpace*(bounds: Rect, maxThings = 10, maxLevels = 10): QuadSpace =
+  result = QuadSpace()
+  result.root = newQuadNode(bounds, 0)
+  result.maxThings = maxThings
+  result.maxLevels = maxLevels
 
-proc whichQuadrant(qs: QuadSpace, e: Entry): int =
+proc insert*(qs: QuadSpace, e: Entry)
+proc insert*(qs: QuadSpace, qn: var QuadNode, e: Entry)
+
+proc whichQuadrant(qs: QuadNode, e: Entry): int =
   let
     xMid = qs.bounds.x + qs.bounds.w/2
     yMid = qs.bounds.y + qs.bounds.h/2
@@ -243,39 +253,42 @@ proc whichQuadrant(qs: QuadSpace, e: Entry): int =
     else:
       return 3
 
-proc split(qs: QuadSpace) =
+proc split(qs: QuadSpace, qn: var QuadNode) =
   let
-    nextLevel = qs.level + 1
-    x = qs.bounds.x
-    y = qs.bounds.y
-    w = qs.bounds.w/2
-    h = qs.bounds.h/2
-  qs.nodes = @[
-    newQuadSpace(Rect(x: x, y: y, w: w, h: h), nextLevel),
-    newQuadSpace(Rect(x: x, y: y+h, w: w, h: h), nextLevel),
-    newQuadSpace(Rect(x: x+w, y: y, w: w, h: h), nextLevel),
-    newQuadSpace(Rect(x: x+w, y: y+h, w: w, h: h), nextLevel)
+    nextLevel = qn.level + 1
+    x = qn.bounds.x
+    y = qn.bounds.y
+    w = qn.bounds.w/2
+    h = qn.bounds.h/2
+  qn.nodes = @[
+    newQuadNode(Rect(x: x, y: y, w: w, h: h), nextLevel),
+    newQuadNode(Rect(x: x, y: y+h, w: w, h: h), nextLevel),
+    newQuadNode(Rect(x: x+w, y: y, w: w, h: h), nextLevel),
+    newQuadNode(Rect(x: x+w, y: y+h, w: w, h: h), nextLevel)
   ]
-  for e in qs.things:
-    let index = qs.whichQuadrant(e)
-    qs.nodes[index].insert(e)
-  qs.things.setLen(0)
+  for e in qn.things:
+    let index = qn.whichQuadrant(e)
+    qs.insert(qn.nodes[index], e)
+  qn.things.setLen(0)
+
+proc insert*(qs: QuadSpace, qn: var QuadNode, e: Entry) =
+  if qn.nodes.len != 0:
+    let index = qn.whichQuadrant(e)
+    qs.insert(qn.nodes[index], e)
+  else:
+    qn.things.add e
+    if qn.things.len > qs.maxThings and qn.level < qs.maxLevels:
+      qs.split(qn)
 
 proc insert*(qs: QuadSpace, e: Entry) =
-  if qs.nodes.len != 0:
-    let index = qs.whichQuadrant(e)
-    qs.nodes[index].insert(e)
-  else:
-    qs.things.add e
-    if qs.things.len > maxThings and qs.level < maxLevels:
-      qs.split()
+  qs.insert(qs.root, e)
 
-proc overlaps(qs: QuadSpace, e: Entry, maxRange: float): bool =
+proc overlaps(qs: QuadNode, e: Entry, maxRange: float): bool =
   return overlapRectCircle(e.pos, maxRange, qs.bounds.x, qs.bounds.y,
       qs.bounds.w, qs.bounds.h)
 
 iterator findInRangeApprox*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
-  var nodes = @[qs]
+  var nodes = @[qs.root]
   while nodes.len > 0:
     var qs = nodes.pop()
     if qs.nodes.len == 4:
@@ -288,7 +301,7 @@ iterator findInRangeApprox*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
 
 iterator findInRange*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
   let maxRangeSq = maxRange * maxRange
-  var nodes = @[qs]
+  var nodes = @[qs.root]
   while nodes.len > 0:
     var qs = nodes.pop()
     if qs.nodes.len == 4:
@@ -301,7 +314,7 @@ iterator findInRange*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
           yield thing
 
 iterator all*(qs: QuadSpace): Entry =
-  var nodes = @[qs]
+  var nodes = @[qs.root]
   while nodes.len > 0:
     var qs = nodes.pop()
     if qs.nodes.len == 4:
@@ -312,14 +325,14 @@ iterator all*(qs: QuadSpace): Entry =
         yield e
 
 proc clear*(qs: QuadSpace) {.inline.} =
-  qs.nodes.setLen(0)
-  qs.things.setLen(0)
+  qs.root.nodes.setLen(0)
+  qs.root.things.setLen(0)
 
 proc finalize*(qs: QuadSpace) {.inline.} =
   discard
 
 proc len*(qs: QuadSpace): int {.inline.} =
-  var nodes = @[qs]
+  var nodes = @[qs.root]
   while nodes.len > 0:
     var qs = nodes.pop()
     if qs.nodes.len == 4:
@@ -328,100 +341,115 @@ proc len*(qs: QuadSpace): int {.inline.} =
     else:
       result += qs.things.len
 
-type KdSpace* = ref object
-  ## KD-Tree, each cell is divided vertically or horizontally.
-  ## Supposed to be good for large amount of entries.
-  things*: seq[Entry]
-  nodes*: seq[KdSpace]
-  bounds*: Rect
-  level*: int
+type
+  KdSpace* = ref object
+    ## KD-Tree, each cell is divided vertically or horizontally.
+    ## Supposed to be good for large amount of entries.
+    root*: KdNode
+    maxThings*: int # When should node divide?
 
-proc newKdSpace*(bounds: Rect, level: int = 0): KdSpace =
-  result = KdSpace()
+  KdNode* = ref object
+    things*: seq[Entry]
+    nodes*: seq[KdNode]
+    bounds*: Rect
+    level*: int
+
+proc newKdNode*(bounds: Rect, level: int): KdNode =
+  result = KdNode()
   result.bounds = bounds
   result.level = level
 
-proc insert*(ks: KdSpace, e: Entry) {.inline.} =
-  ks.things.add e
+proc newKdSpace*(bounds: Rect, maxThings = 10, maxLevels = 10): KdSpace =
+  result = KdSpace()
+  result.root = newKdNode(bounds, 0)
+  result.maxThings = maxThings
 
-proc finalize*(ks: KdSpace) =
-  if ks.things.len > maxThings:
-    let axis = ks.level mod 2
-    ks.things.sort proc(a, b: Entry): int = cmp(a.pos[axis], b.pos[axis])
+proc insert*(ks: KdSpace, e: Entry) {.inline.} =
+  ks.root.things.add e
+
+proc finalize(ks: KdSpace, kn: KdNode) =
+  if kn.things.len > ks.maxThings:
+    var axis =
+      if kn.bounds.w > kn.bounds.h: 0
+      else: 1
+    kn.things.sort proc(a, b: Entry): int = cmp(a.pos[axis], b.pos[axis])
     let
-      b = ks.bounds
-      arr1 = ks.things[0 ..< ks.things.len div 2]
-      arr2 = ks.things[ks.things.len div 2 .. ^1]
+      b = kn.bounds
+      arr1 = kn.things[0 ..< kn.things.len div 2]
+      arr2 = kn.things[kn.things.len div 2 .. ^1]
       mid = arr1[^1].pos[axis]
     var
-      node1: KdSpace
-      node2: KdSpace
+      node1: KdNode
+      node2: KdNode
     if axis == 0:
       let midW = mid - b.x
-      node1 = newKdSpace(rect(b.x, b.y, midW, b.h), ks.level + 1)
-      node2 = newKdSpace(rect(mid, b.y, b.w - midW, b.h), ks.level + 1)
+      node1 = newKdNode(rect(b.x, b.y, midW, b.h), kn.level + 1)
+      node2 = newKdNode(rect(mid, b.y, b.w - midW, b.h), kn.level + 1)
     else:
       let midH = mid - b.y
-      node1 = newKdSpace(rect(b.x, b.y, b.w, midH), ks.level + 1)
-      node2 = newKdSpace(rect(b.x, mid, b.w, b.h - midH), ks.level + 1)
+      node1 = newKdNode(rect(b.x, b.y, b.w, midH), kn.level + 1)
+      node2 = newKdNode(rect(b.x, mid, b.w, b.h - midH), kn.level + 1)
     node1.things = arr1
     node2.things = arr2
-    node1.finalize()
-    node2.finalize()
-    ks.things.setLen(0)
-    ks.nodes = @[node1, node2]
+    ks.finalize(node1)
+    ks.finalize(node2)
+    kn.things.setLen(0)
+    kn.nodes = @[node1, node2]
 
-proc overlaps(ks: KdSpace, e: Entry, maxRange: float): bool =
-  return overlapRectCircle(e.pos, maxRange, ks.bounds.x, ks.bounds.y,
-      ks.bounds.w, ks.bounds.h)
+proc finalize*(ks: KdSpace) =
+  ks.finalize(ks.root)
+
+proc overlaps(kn: KdNode, e: Entry, maxRange: float): bool =
+  return overlapRectCircle(e.pos, maxRange, kn.bounds.x, kn.bounds.y,
+      kn.bounds.w, kn.bounds.h)
 
 iterator findInRangeApprox*(ks: KdSpace, e: Entry, maxRange: float): Entry =
-  var nodes = @[ks]
+  var nodes = @[ks.root]
   while nodes.len > 0:
-    var ks = nodes.pop()
-    if ks.nodes.len == 2:
-      for node in ks.nodes:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
         if node.overlaps(e, maxRange):
           nodes.add(node)
     else:
-      for e in ks.things:
+      for e in kn.things:
         yield e
 
 iterator findInRange*(ks: KdSpace, e: Entry, maxRange: float): Entry =
   let maxRangeSq = maxRange * maxRange
-  var nodes = @[ks]
+  var nodes = @[ks.root]
   while nodes.len > 0:
-    var ks = nodes.pop()
-    if ks.nodes.len == 2:
-      for node in ks.nodes:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
         if node.overlaps(e, maxRange):
           nodes.add(node)
     else:
-      for thing in ks.things:
+      for thing in kn.things:
         if thing.id != e.id and thing.pos.distSq(e.pos) < maxRangeSq:
           yield thing
 
 iterator all*(ks: KdSpace): Entry =
-  var nodes = @[ks]
+  var nodes = @[ks.root]
   while nodes.len > 0:
-    var ks = nodes.pop()
-    if ks.nodes.len == 2:
-      for node in ks.nodes:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
         nodes.add(node)
     else:
-      for e in ks.things:
+      for e in kn.things:
         yield e
 
-proc clear*(kd: KdSpace) {.inline.} =
-  kd.things.setLen(0)
-  kd.nodes.setLen(0)
+proc clear*(ks: KdSpace) {.inline.} =
+  ks.root.things.setLen(0)
+  ks.root.nodes.setLen(0)
 
 proc len*(ks: KdSpace): int =
-  var nodes = @[ks]
+  var nodes = @[ks.root]
   while nodes.len > 0:
-    var ks = nodes.pop()
-    if ks.nodes.len == 2:
-      for node in ks.nodes:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
         nodes.add(node)
     else:
-      result += ks.things.len
+      result += kn.things.len

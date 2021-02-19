@@ -4,13 +4,13 @@ Spatial algorithms find "closest" things faster than simple brute force iteratio
 
 One key design decision is that all spaces have a very similar API and can be easily swapped. This way you can swap out spaces and see which one works best for your use case.
 
-### Perf time (1000 vs 1000 at 0.01 distance):
+### Perf time (1000 vs 1000 at 0.001 distance):
 ```
-BruteSpace ......................... 1.834 ms      1.896 ms    ±0.076   x100
-SortSpace .......................... 1.530 ms      1.544 ms    ±0.018   x100
-HashSpace .......................... 0.477 ms      0.487 ms    ±0.012   x100
-QuadSpace .......................... 0.210 ms      0.219 ms    ±0.009   x100
-KdSpace ............................ 0.795 ms      0.805 ms    ±0.012   x100
+BruteSpace ......................... 1.839 ms      1.869 ms    ±0.052   x100
+SortSpace .......................... 1.511 ms      1.539 ms    ±0.028   x100
+HashSpace .......................... 0.441 ms      0.457 ms    ±0.022   x100
+QuadSpace .......................... 0.185 ms      0.195 ms    ±0.010   x100
+KdSpace ............................ 0.519 ms      0.548 ms    ±0.037   x100
 ```
 
 You would usually pick the best one for your usecase by profiling and tuning. There is a cost to generating each space, you need to make sure it justifies the lookup time savings.
