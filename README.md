@@ -78,7 +78,7 @@ Entry = object
 
 ## **type** BruteSpace
 
-Brute space just compares every entry vs every other entry. Supposed to be good for very small number or large ranges.
+Brute-force space just compares every entry vs every other entry. Supposed to be good for very small number or large ranges.
 
 ```nim
 BruteSpace = ref object
@@ -87,6 +87,7 @@ BruteSpace = ref object
 
 ## **proc** newBruteSpace
 
+Creates a new brute-force space.
 
 ```nim
 proc newBruteSpace(): BruteSpace
@@ -94,6 +95,7 @@ proc newBruteSpace(): BruteSpace
 
 ## **proc** insert
 
+Adds entry to the space.
 
 ```nim
 proc insert(bs: BruteSpace; e: Entry) {.inline.}
@@ -101,34 +103,15 @@ proc insert(bs: BruteSpace; e: Entry) {.inline.}
 
 ## **proc** finalize
 
+Finishes the space and makes it ready for use.
 
 ```nim
 proc finalize(bs: BruteSpace) {.inline.}
 ```
 
-## **iterator** all
-
-
-```nim
-iterator all(bs: BruteSpace): Entry
-```
-
-## **iterator** findInRange
-
-
-```nim
-iterator findInRange(bs: BruteSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** findInRangeApprox
-
-
-```nim
-iterator findInRangeApprox(bs: BruteSpace; e: Entry; maxRange: float): Entry
-```
-
 ## **proc** clear
 
+Clears the spaces and makes it ready to be used again.
 
 ```nim
 proc clear(bs: BruteSpace) {.inline.}
@@ -136,9 +119,34 @@ proc clear(bs: BruteSpace) {.inline.}
 
 ## **proc** len
 
+Number of entries inserted
 
 ```nim
 proc len(bs: BruteSpace): int {.inline.}
+```
+
+## **iterator** all
+
+Iterates all entries in a space.
+
+```nim
+iterator all(bs: BruteSpace): Entry
+```
+
+## **iterator** findInRangeApprox
+
+Iterates all entries in range of an entry but does not cull them. Useful if you need distance anyways and will compute other computations.
+
+```nim
+iterator findInRangeApprox(bs: BruteSpace; e: Entry; radius: float): Entry
+```
+
+## **iterator** findInRange
+
+Iterates all entries in range of an entry.
+
+```nim
+iterator findInRange(bs: BruteSpace; e: Entry; radius: float): Entry
 ```
 
 ## **type** SortSpace
@@ -152,6 +160,7 @@ SortSpace = ref object
 
 ## **proc** newSortSpace
 
+Creates a new sorted space.
 
 ```nim
 proc newSortSpace(): SortSpace
@@ -159,6 +168,7 @@ proc newSortSpace(): SortSpace
 
 ## **proc** insert
 
+Adds entry to the space.
 
 ```nim
 proc insert(ss: SortSpace; e: Entry) {.inline.}
@@ -166,34 +176,15 @@ proc insert(ss: SortSpace; e: Entry) {.inline.}
 
 ## **proc** finalize
 
+Finishes the space and makes it ready for use.
 
 ```nim
 proc finalize(ss: SortSpace) {.inline.}
 ```
 
-## **iterator** all
-
-
-```nim
-iterator all(ss: SortSpace): Entry
-```
-
-## **iterator** findInRange
-
-
-```nim
-iterator findInRange(ss: SortSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** findInRangeApprox
-
-
-```nim
-iterator findInRangeApprox(ss: SortSpace; e: Entry; maxRange: float): Entry
-```
-
 ## **proc** clear
 
+Clears the spaces and makes it ready to be used again.
 
 ```nim
 proc clear(ss: SortSpace) {.inline.}
@@ -201,9 +192,34 @@ proc clear(ss: SortSpace) {.inline.}
 
 ## **proc** len
 
+Number of entries inserted.
 
 ```nim
 proc len(ss: SortSpace): int {.inline.}
+```
+
+## **iterator** all
+
+Iterates all entries in a space.
+
+```nim
+iterator all(ss: SortSpace): Entry
+```
+
+## **iterator** findInRangeApprox
+
+Iterates all entries in range of an entry but does not cull them. Useful if you need distance anyways and will compute other computations.
+
+```nim
+iterator findInRangeApprox(ss: SortSpace; e: Entry; radius: float): Entry
+```
+
+## **iterator** findInRange
+
+Iterates all entries in range of an entry.
+
+```nim
+iterator findInRange(ss: SortSpace; e: Entry; radius: float): Entry
 ```
 
 ## **type** HashSpace
@@ -218,6 +234,7 @@ HashSpace = ref object
 
 ## **proc** newHashSpace
 
+Creates a hash table space.
 
 ```nim
 proc newHashSpace(resolution: float): HashSpace
@@ -225,13 +242,39 @@ proc newHashSpace(resolution: float): HashSpace
 
 ## **proc** insert
 
+Adds entry to the space.
 
 ```nim
 proc insert(hs: HashSpace; e: Entry) {.raises: [KeyError].}
 ```
 
+## **proc** finalize
+
+Finishes the space and makes it ready for use.
+
+```nim
+proc finalize(hs: HashSpace) {.inline.}
+```
+
+## **proc** clear
+
+Clears the spaces and makes it ready to be used again.
+
+```nim
+proc clear(hs: HashSpace) {.inline.}
+```
+
+## **proc** len
+
+Number of entries inserted
+
+```nim
+proc len(hs: HashSpace): int {.inline.}
+```
+
 ## **iterator** all
 
+Iterates all entries in a space.
 
 ```nim
 iterator all(hs: HashSpace): Entry
@@ -239,37 +282,18 @@ iterator all(hs: HashSpace): Entry
 
 ## **iterator** findInRangeApprox
 
+Iterates all entries in range of an entry but does not cull them. Useful if you need distance anyways and will compute other computations.
 
 ```nim
-iterator findInRangeApprox(hs: HashSpace; e: Entry; maxRange: float): Entry {.raises: [KeyError].}
+iterator findInRangeApprox(hs: HashSpace; e: Entry; radius: float): Entry {.raises: [KeyError].}
 ```
 
 ## **iterator** findInRange
 
+Iterates all entries in range of an entry.
 
 ```nim
-iterator findInRange(hs: HashSpace; e: Entry; maxRange: float): Entry {.raises: [KeyError].}
-```
-
-## **proc** clear
-
-
-```nim
-proc clear(hs: HashSpace) {.inline.}
-```
-
-## **proc** finalize
-
-
-```nim
-proc finalize(hs: HashSpace) {.inline.}
-```
-
-## **proc** len
-
-
-```nim
-proc len(hs: HashSpace): int {.inline.}
+iterator findInRange(hs: HashSpace; e: Entry; radius: float): Entry {.raises: [KeyError].}
 ```
 
 ## **type** QuadSpace
@@ -296,6 +320,7 @@ QuadNode = ref object
 
 ## **proc** newQuadSpace
 
+Creates a new quad-tree space.
 
 ```nim
 proc newQuadSpace(bounds: Rect; maxThings = 10; maxLevels = 10): QuadSpace
@@ -310,51 +335,58 @@ proc insert(qs: QuadSpace; qn: var QuadNode; e: Entry) {.raises: [Exception], ta
 
 ## **proc** insert
 
+Adds entry to the space.
 
 ```nim
 proc insert(qs: QuadSpace; e: Entry) {.raises: [Exception], tags: [RootEffect].}
 ```
 
-## **iterator** findInRangeApprox
-
-
-```nim
-iterator findInRangeApprox(qs: QuadSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** findInRange
-
-
-```nim
-iterator findInRange(qs: QuadSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** all
-
-
-```nim
-iterator all(qs: QuadSpace): Entry
-```
-
-## **proc** clear
-
-
-```nim
-proc clear(qs: QuadSpace) {.inline.}
-```
-
 ## **proc** finalize
 
+Finishes the space and makes it ready for use.
 
 ```nim
 proc finalize(qs: QuadSpace) {.inline.}
 ```
 
+## **proc** clear
+
+Clears the spaces and makes it ready to be used again.
+
+```nim
+proc clear(qs: QuadSpace) {.inline.}
+```
+
 ## **proc** len
 
+Number of entries inserted.
 
 ```nim
 proc len(qs: QuadSpace): int {.inline.}
+```
+
+## **iterator** all
+
+Iterates all entries in a space.
+
+```nim
+iterator all(qs: QuadSpace): Entry
+```
+
+## **iterator** findInRangeApprox
+
+Iterates all entries in range of an entry but does not cull them. Useful if you need distance anyways and will compute other computations.
+
+```nim
+iterator findInRangeApprox(qs: QuadSpace; e: Entry; radius: float): Entry
+```
+
+## **iterator** findInRange
+
+Iterates all entries in range of an entry.
+
+```nim
+iterator findInRange(qs: QuadSpace; e: Entry; radius: float): Entry
 ```
 
 ## **type** KdSpace
@@ -378,15 +410,9 @@ KdNode = ref object
  level*: int
 ```
 
-## **proc** newKdNode
-
-
-```nim
-proc newKdNode(bounds: Rect; level: int): KdNode
-```
-
 ## **proc** newKdSpace
 
+Creates a new space based on kd-tree.
 
 ```nim
 proc newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace
@@ -394,6 +420,7 @@ proc newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace
 
 ## **proc** insert
 
+Adds entry to the space.
 
 ```nim
 proc insert(ks: KdSpace; e: Entry) {.inline.}
@@ -401,34 +428,15 @@ proc insert(ks: KdSpace; e: Entry) {.inline.}
 
 ## **proc** finalize
 
+Finishes the space and makes it ready for use.
 
 ```nim
 proc finalize(ks: KdSpace)
 ```
 
-## **iterator** findInRangeApprox
-
-
-```nim
-iterator findInRangeApprox(ks: KdSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** findInRange
-
-
-```nim
-iterator findInRange(ks: KdSpace; e: Entry; maxRange: float): Entry
-```
-
-## **iterator** all
-
-
-```nim
-iterator all(ks: KdSpace): Entry
-```
-
 ## **proc** clear
 
+Clears the spaces and makes it ready to be used again.
 
 ```nim
 proc clear(ks: KdSpace) {.inline.}
@@ -436,7 +444,32 @@ proc clear(ks: KdSpace) {.inline.}
 
 ## **proc** len
 
+Number of entries inserted.
 
 ```nim
 proc len(ks: KdSpace): int
+```
+
+## **iterator** all
+
+Iterates all entries in a space.
+
+```nim
+iterator all(ks: KdSpace): Entry
+```
+
+## **iterator** findInRangeApprox
+
+Iterates all entries in range of an entry but does not cull them. Useful if you need distance anyways and will compute other computations.
+
+```nim
+iterator findInRangeApprox(ks: KdSpace; e: Entry; radius: float): Entry
+```
+
+## **iterator** findInRange
+
+Iterates all entries in range of an entry.
+
+```nim
+iterator findInRange(ks: KdSpace; e: Entry; radius: float): Entry
 ```

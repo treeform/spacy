@@ -2,6 +2,29 @@ import pixie, random, spacy, strformat, tables, times, vmath
 
 let radius = 100.0
 
+proc strokeCircle*(
+  image: Image,
+  center: Vec2,
+  radius: float32,
+  color: ColorRGBA,
+  strokeWidth: float32 = 1.0,
+  blendMode = bmNormal
+) =
+  var path: Path
+  path.ellipse(center, radius, radius)
+  image.strokePath(path, color, blendMode=blendMode, strokeWidth=strokeWidth)
+
+proc strokeRect*(
+  image: Image,
+  rect: Rect,
+  color: ColorRGBA,
+  strokeWidth: float32 = 1.0,
+  blendMode = bmNormal
+) =
+  var path: Path
+  path.rect(rect)
+  image.strokePath(path, color, blendMode=blendMode, strokeWidth=strokeWidth)
+
 proc drawInternal(image: Image, bs: BruteSpace, at: Entry) =
   discard
 

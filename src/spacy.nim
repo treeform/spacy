@@ -5,40 +5,49 @@ type Entry* = object
   pos*: Vec2
 
 type BruteSpace* = ref object
-  ## Brute space just compares every entry vs every other entry.
+  ## Brute-force space just compares every entry vs every other entry.
   ## Supposed to be good for very small number or large ranges.
   list*: seq[Entry]
 
 proc newBruteSpace*(): BruteSpace =
+  ## Creates a new brute-force space.
   result = BruteSpace()
   result.list = newSeq[Entry]()
 
 proc insert*(bs: BruteSpace, e: Entry) {.inline.} =
+  ## Adds entry to the space.
   bs.list.add e
 
 proc finalize*(bs: BruteSpace) {.inline.} =
+  ## Finishes the space and makes it ready for use.
   discard
 
+proc clear*(bs: BruteSpace) {.inline.} =
+  ## Clears the spaces and makes it ready to be used again.
+  bs.list.setLen(0)
+
+proc len*(bs: BruteSpace): int {.inline.} =
+  ## Number of entries inserted
+  bs.list.len
+
 iterator all*(bs: BruteSpace): Entry =
+  ## Iterates all entries in a space.
   for e in bs.list:
     yield e
 
-iterator findInRange*(bs: BruteSpace, e: Entry, maxRange: float): Entry =
-  let maxRangeSq = maxRange * maxRange
-  for thing in bs.list:
-    if e.id != thing.id and e.pos.distSq(thing.pos) < maxRangeSq:
-      yield thing
-
-iterator findInRangeApprox*(bs: BruteSpace, e: Entry, maxRange: float): Entry =
+iterator findInRangeApprox*(bs: BruteSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry but does not cull them.
+  ## Useful if you need distance anyways and will compute other computations.
   for thing in bs.list:
     if e.id != thing.id:
       yield thing
 
-proc clear*(bs: BruteSpace) {.inline.} =
-  bs.list.setLen(0)
-
-proc len*(bs: BruteSpace): int {.inline.} =
-  bs.list.len
+iterator findInRange*(bs: BruteSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry.
+  let radiusSq = radius * radius
+  for thing in bs.findInRangeApprox(e, radius):
+    if e.pos.distSq(thing.pos) < radiusSq:
+      yield thing
 
 type SortSpace* = ref object
   ## Sort space sorts all entires on one axis X.
@@ -46,51 +55,37 @@ type SortSpace* = ref object
   list*: seq[Entry]
 
 proc newSortSpace*(): SortSpace =
+  ## Creates a new sorted space.
   result = SortSpace()
   result.list = newSeq[Entry]()
 
 proc insert*(ss: SortSpace, e: Entry) {.inline.} =
+  ## Adds entry to the space.
   ss.list.add e
 
 proc sortSpaceCmp(a, b: Entry): int =
   cmp(a.pos.x, b.pos.x)
 
 proc finalize*(ss: SortSpace) {.inline.} =
+  ## Finishes the space and makes it ready for use.
   ss.list.sort(sortSpaceCmp)
 
+proc clear*(ss: SortSpace) {.inline.} =
+  ## Clears the spaces and makes it ready to be used again.
+  ss.list.setLen(0)
+
+proc len*(ss: SortSpace): int {.inline.} =
+  ## Number of entries inserted.
+  ss.list.len
+
 iterator all*(ss: SortSpace): Entry =
+  ## Iterates all entries in a space.
   for e in ss.list:
     yield e
 
-iterator findInRange*(ss: SortSpace, e: Entry, maxRange: float): Entry =
-  let
-    maxRangeSq = maxRange * maxRange
-    l = ss.list
-
-  # find index of entry
-  let index = ss.list.lowerBound(e, sortSpaceCmp)
-
-  # scan to the right
-  var right = index
-  while right < l.len:
-    let thing = l[right]
-    if thing.pos.x - e.pos.x > maxRange:
-      break
-    if thing.id != e.id and thing.pos.distSq(e.pos) < maxRangeSq:
-      yield thing
-    inc right
-
-  # scan to the left
-  var left = index - 1
-  while left >= 0:
-    let thing = l[left]
-    if e.pos.x - thing.pos.x > maxRange:
-      break
-    if thing.pos.distSq(e.pos) < maxRangeSq:
-      yield thing
-    dec left
-
-iterator findInRangeApprox*(ss: SortSpace, e: Entry, maxRange: float): Entry =
+iterator findInRangeApprox*(ss: SortSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry but does not cull them.
+  ## Useful if you need distance anyways and will compute other computations.
   let
     l = ss.list
 
@@ -101,7 +96,7 @@ iterator findInRangeApprox*(ss: SortSpace, e: Entry, maxRange: float): Entry =
   var right = index
   while right < l.len:
     let thing = l[right]
-    if thing.pos.x - e.pos.x > maxRange:
+    if thing.pos.x - e.pos.x > radius:
       break
     if thing.id != e.id:
       yield thing
@@ -111,16 +106,17 @@ iterator findInRangeApprox*(ss: SortSpace, e: Entry, maxRange: float): Entry =
   var left = index - 1
   while left >= 0:
     let thing = l[left]
-    if e.pos.x - thing.pos.x > maxRange:
+    if e.pos.x - thing.pos.x > radius:
       break
     yield thing
     dec left
 
-proc clear*(ss: SortSpace) {.inline.} =
-  ss.list.setLen(0)
-
-proc len*(ss: SortSpace): int {.inline.} =
-  ss.list.len
+iterator findInRange*(ss: SortSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry.
+  let radiusSq = radius * radius
+  for thing in ss.findInRangeApprox(e, radius):
+    if e.pos.distSq(thing.pos) < radiusSq:
+      yield thing
 
 type HashSpace* = ref object
   ## Divides space into little tiles that objects are hashed too.
@@ -129,6 +125,7 @@ type HashSpace* = ref object
   resolution*: float
 
 proc newHashSpace*(resolution: float): HashSpace =
+  ## Creates a hash table space.
   result = HashSpace()
   result.hash = newTable[(int32, int32), seq[Entry]]()
   result.resolution = resolution
@@ -137,23 +134,31 @@ proc hashSpaceKey(hs: HashSpace, e: Entry): (int32, int32) =
   (int32(floor(e.pos.x / hs.resolution)), int32(floor(e.pos.y / hs.resolution)))
 
 proc insert*(hs: HashSpace, e: Entry) =
+  ## Adds entry to the space.
   let key = hs.hashSpaceKey(e)
   if key in hs.hash:
     hs.hash[key].add(e)
   else:
     hs.hash[key] = @[e]
 
+proc finalize*(hs: HashSpace) {.inline.} =
+  ## Finishes the space and makes it ready for use.
+  discard
+
+proc clear*(hs: HashSpace) {.inline.} =
+  ## Clears the spaces and makes it ready to be used again.
+  hs.hash.clear()
+
+proc len*(hs: HashSpace): int {.inline.} =
+  ## Number of entries inserted
+  for list in hs.hash.values:
+    result += list.len
+
 iterator all*(hs: HashSpace): Entry =
+  ## Iterates all entries in a space.
   for list in hs.hash.values:
     for e in list:
       yield e
-
-proc clamp(value, min, max: float): float =
-  if value < min:
-    return min
-  if value > max:
-    return max
-  return value
 
 proc overlapRectCircle(point: Vec2, radius, x, y, w, h: float): bool =
   let
@@ -161,9 +166,11 @@ proc overlapRectCircle(point: Vec2, radius, x, y, w, h: float): bool =
     dy = point.y - clamp(point.y, y, y + h)
   return (dx * dx + dy * dy) <= (radius * radius)
 
-iterator findInRangeApprox*(hs: HashSpace, e: Entry, maxRange: float): Entry =
+iterator findInRangeApprox*(hs: HashSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry but does not cull them.
+  ## Useful if you need distance anyways and will compute other computations.
   let
-    d = int(maxRange / hs.resolution) + 1
+    d = int(radius / hs.resolution) + 1
     px = int(e.pos.x / hs.resolution)
     py = int(e.pos.y / hs.resolution)
 
@@ -172,7 +179,7 @@ iterator findInRangeApprox*(hs: HashSpace, e: Entry, maxRange: float): Entry =
       let
         rx = px + x
         ry = py + y
-      if overlapRectCircle(e.pos, maxRange, float(rx) * hs.resolution, float(
+      if overlapRectCircle(e.pos, radius, float(rx) * hs.resolution, float(
           ry) * hs.resolution, hs.resolution, hs.resolution):
         let posKey = (int32 rx, int32 ry)
         if posKey in hs.hash:
@@ -180,35 +187,12 @@ iterator findInRangeApprox*(hs: HashSpace, e: Entry, maxRange: float): Entry =
             if thing.id != e.id:
               yield thing
 
-iterator findInRange*(hs: HashSpace, e: Entry, maxRange: float): Entry =
-  let
-    d = int(maxRange / hs.resolution) + 1
-    px = int(e.pos.x / hs.resolution)
-    py = int(e.pos.y / hs.resolution)
-    maxRangeSq = maxRange * maxRange
-
-  for x in -d .. d:
-    for y in -d .. d:
-      let
-        rx = px + x
-        ry = py + y
-      if overlapRectCircle(e.pos, maxRange, float(rx) * hs.resolution, float(
-          ry) * hs.resolution, hs.resolution, hs.resolution):
-        let posKey = (int32 rx, int32 ry)
-        if posKey in hs.hash:
-          for thing in hs.hash[posKey]:
-            if thing.id != e.id and thing.pos.distSq(e.pos) < maxRangeSq:
-              yield thing
-
-proc clear*(hs: HashSpace) {.inline.} =
-  hs.hash.clear()
-
-proc finalize*(hs: HashSpace) {.inline.} =
-  discard
-
-proc len*(hs: HashSpace): int {.inline.} =
-  for list in hs.hash.values:
-    result += list.len
+iterator findInRange*(hs: HashSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry.
+  let radiusSq = radius * radius
+  for thing in hs.findInRangeApprox(e, radius):
+    if e.pos.distSq(thing.pos) < radiusSq:
+      yield thing
 
 type
   QuadSpace* = ref object
@@ -230,6 +214,7 @@ proc newQuadNode(bounds: Rect, level: int): QuadNode =
   result.level = level
 
 proc newQuadSpace*(bounds: Rect, maxThings = 10, maxLevels = 10): QuadSpace =
+  ## Creates a new quad-tree space.
   result = QuadSpace()
   result.root = newQuadNode(bounds, 0)
   result.maxThings = maxThings
@@ -271,7 +256,7 @@ proc split(qs: QuadSpace, qn: var QuadNode) =
     qs.insert(qn.nodes[index], e)
   qn.things.setLen(0)
 
-proc insert*(qs: QuadSpace, qn: var QuadNode, e: Entry) =
+proc insert(qs: QuadSpace, qn: var QuadNode, e: Entry) =
   if qn.nodes.len != 0:
     let index = qn.whichQuadrant(e)
     qs.insert(qn.nodes[index], e)
@@ -281,57 +266,20 @@ proc insert*(qs: QuadSpace, qn: var QuadNode, e: Entry) =
       qs.split(qn)
 
 proc insert*(qs: QuadSpace, e: Entry) =
+  ## Adds entry to the space.
   qs.insert(qs.root, e)
 
-proc overlaps(qs: QuadNode, e: Entry, maxRange: float): bool =
-  return overlapRectCircle(e.pos, maxRange, qs.bounds.x, qs.bounds.y,
-      qs.bounds.w, qs.bounds.h)
-
-iterator findInRangeApprox*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
-  var nodes = @[qs.root]
-  while nodes.len > 0:
-    var qs = nodes.pop()
-    if qs.nodes.len == 4:
-      for node in qs.nodes:
-        if node.overlaps(e, maxRange):
-          nodes.add(node)
-    else:
-      for e in qs.things:
-        yield e
-
-iterator findInRange*(qs: QuadSpace, e: Entry, maxRange: float): Entry =
-  let maxRangeSq = maxRange * maxRange
-  var nodes = @[qs.root]
-  while nodes.len > 0:
-    var qs = nodes.pop()
-    if qs.nodes.len == 4:
-      for node in qs.nodes:
-        if node.overlaps(e, maxRange):
-          nodes.add(node)
-    else:
-      for thing in qs.things:
-        if thing.id != e.id and thing.pos.distSq(e.pos) < maxRangeSq:
-          yield thing
-
-iterator all*(qs: QuadSpace): Entry =
-  var nodes = @[qs.root]
-  while nodes.len > 0:
-    var qs = nodes.pop()
-    if qs.nodes.len == 4:
-      for node in qs.nodes:
-        nodes.add(node)
-    else:
-      for e in qs.things:
-        yield e
+proc finalize*(qs: QuadSpace) {.inline.} =
+  ## Finishes the space and makes it ready for use.
+  discard
 
 proc clear*(qs: QuadSpace) {.inline.} =
+  ## Clears the spaces and makes it ready to be used again.
   qs.root.nodes.setLen(0)
   qs.root.things.setLen(0)
 
-proc finalize*(qs: QuadSpace) {.inline.} =
-  discard
-
 proc len*(qs: QuadSpace): int {.inline.} =
+  ## Number of entries inserted.
   var nodes = @[qs.root]
   while nodes.len > 0:
     var qs = nodes.pop()
@@ -340,6 +288,43 @@ proc len*(qs: QuadSpace): int {.inline.} =
         nodes.add(node)
     else:
       result += qs.things.len
+
+iterator all*(qs: QuadSpace): Entry =
+  ## Iterates all entries in a space.
+  var nodes = @[qs.root]
+  while nodes.len > 0:
+    var qs = nodes.pop()
+    if qs.nodes.len == 4:
+      for node in qs.nodes:
+        nodes.add(node)
+    else:
+      for e in qs.things:
+        yield e
+
+proc overlaps(qs: QuadNode, e: Entry, radius: float): bool =
+  return overlapRectCircle(e.pos, radius, qs.bounds.x, qs.bounds.y,
+      qs.bounds.w, qs.bounds.h)
+
+iterator findInRangeApprox*(qs: QuadSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry but does not cull them.
+  ## Useful if you need distance anyways and will compute other computations.
+  var nodes = @[qs.root]
+  while nodes.len > 0:
+    var qs = nodes.pop()
+    if qs.nodes.len == 4:
+      for node in qs.nodes:
+        if node.overlaps(e, radius):
+          nodes.add(node)
+    else:
+      for e in qs.things:
+        yield e
+
+iterator findInRange*(qs: QuadSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry.
+  let radiusSq = radius * radius
+  for thing in qs.findInRangeApprox(e, radius):
+    if e.pos.distSq(thing.pos) < radiusSq:
+      yield thing
 
 type
   KdSpace* = ref object
@@ -354,17 +339,19 @@ type
     bounds*: Rect
     level*: int
 
-proc newKdNode*(bounds: Rect, level: int): KdNode =
+proc newKdNode(bounds: Rect, level: int): KdNode =
   result = KdNode()
   result.bounds = bounds
   result.level = level
 
 proc newKdSpace*(bounds: Rect, maxThings = 10, maxLevels = 10): KdSpace =
+  ## Creates a new space based on kd-tree.
   result = KdSpace()
   result.root = newKdNode(bounds, 0)
   result.maxThings = maxThings
 
 proc insert*(ks: KdSpace, e: Entry) {.inline.} =
+  ## Adds entry to the space.
   ks.root.things.add e
 
 proc finalize(ks: KdSpace, kn: KdNode) =
@@ -397,54 +384,16 @@ proc finalize(ks: KdSpace, kn: KdNode) =
     kn.nodes = @[node1, node2]
 
 proc finalize*(ks: KdSpace) =
+  ## Finishes the space and makes it ready for use.
   ks.finalize(ks.root)
 
-proc overlaps(kn: KdNode, e: Entry, maxRange: float): bool =
-  return overlapRectCircle(e.pos, maxRange, kn.bounds.x, kn.bounds.y,
-      kn.bounds.w, kn.bounds.h)
-
-iterator findInRangeApprox*(ks: KdSpace, e: Entry, maxRange: float): Entry =
-  var nodes = @[ks.root]
-  while nodes.len > 0:
-    var kn = nodes.pop()
-    if kn.nodes.len == 2:
-      for node in kn.nodes:
-        if node.overlaps(e, maxRange):
-          nodes.add(node)
-    else:
-      for e in kn.things:
-        yield e
-
-iterator findInRange*(ks: KdSpace, e: Entry, maxRange: float): Entry =
-  let maxRangeSq = maxRange * maxRange
-  var nodes = @[ks.root]
-  while nodes.len > 0:
-    var kn = nodes.pop()
-    if kn.nodes.len == 2:
-      for node in kn.nodes:
-        if node.overlaps(e, maxRange):
-          nodes.add(node)
-    else:
-      for thing in kn.things:
-        if thing.id != e.id and thing.pos.distSq(e.pos) < maxRangeSq:
-          yield thing
-
-iterator all*(ks: KdSpace): Entry =
-  var nodes = @[ks.root]
-  while nodes.len > 0:
-    var kn = nodes.pop()
-    if kn.nodes.len == 2:
-      for node in kn.nodes:
-        nodes.add(node)
-    else:
-      for e in kn.things:
-        yield e
-
 proc clear*(ks: KdSpace) {.inline.} =
+  ## Clears the spaces and makes it ready to be used again.
   ks.root.things.setLen(0)
   ks.root.nodes.setLen(0)
 
 proc len*(ks: KdSpace): int =
+  ## Number of entries inserted.
   var nodes = @[ks.root]
   while nodes.len > 0:
     var kn = nodes.pop()
@@ -453,3 +402,40 @@ proc len*(ks: KdSpace): int =
         nodes.add(node)
     else:
       result += kn.things.len
+
+iterator all*(ks: KdSpace): Entry =
+  ## Iterates all entries in a space.
+  var nodes = @[ks.root]
+  while nodes.len > 0:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
+        nodes.add(node)
+    else:
+      for e in kn.things:
+        yield e
+
+proc overlaps(kn: KdNode, e: Entry, radius: float): bool =
+  return overlapRectCircle(e.pos, radius, kn.bounds.x, kn.bounds.y,
+      kn.bounds.w, kn.bounds.h)
+
+iterator findInRangeApprox*(ks: KdSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry but does not cull them.
+  ## Useful if you need distance anyways and will compute other computations.
+  var nodes = @[ks.root]
+  while nodes.len > 0:
+    var kn = nodes.pop()
+    if kn.nodes.len == 2:
+      for node in kn.nodes:
+        if node.overlaps(e, radius):
+          nodes.add(node)
+    else:
+      for e in kn.things:
+        yield e
+
+iterator findInRange*(ks: KdSpace, e: Entry, radius: float): Entry =
+  ## Iterates all entries in range of an entry.
+  let radiusSq = radius * radius
+  for thing in ks.findInRangeApprox(e, radius):
+    if e.pos.distSq(thing.pos) < radiusSq:
+      yield thing
