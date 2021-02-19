@@ -1,6 +1,6 @@
 # Spatial data structures for Nim.
 
-Spatial algorithms find "closest" things faster than simple brute force iteration would. They make your code run faster using smarter data structures. This library has different "Spaces" that you can use to speed up games and graphical applications.
+Spatial algorithms are used to find the "closest" things faster than simple brute force iteration would. They make your code run faster using smarter data structures. This library has different "Spaces" that you can use to speed up games and graphical applications.
 
 One key design decision is that all spaces have a very similar API and can be easily swapped. This way you can swap out spaces and see which one works best for your use case.
 
@@ -21,7 +21,7 @@ BruteSpace is basically a brute force algorithm that takes every inserted elemen
 
 ![examples/BruteSpace.png](examples/BruteSpace.png)
 
-The BruteSpace is faster is when there are less elements in the space or you don't do many look ups. It’s a good baseline space that enables you to see how slow things actually can be. Don't discount it! Linear scans are pretty fast when you are just zipping through memory. Brute force might be all you need!
+The BruteSpace is faster when there are few elements in the space or you don't do many look ups. It’s a good baseline space that enables you to see how slow things actually can be. Don't discount it! Linear scans are pretty fast when you are just zipping through memory. Brute force might be all you need!
 
 # SortSpace
 
@@ -35,7 +35,7 @@ SortSpace draws its power from the underlying sorting algorithm n×log(n) nature
 
 # HashSpace
 
-HashSpace is a little more complex than SortSpace but it’s still pretty simple. Instead of drawing the power from a sorting algorithm it draws its power from hash tables. HashSpace has a resolution and every entry going in is put into a grid-bucket. To check for surrounding entries you simply look up closest grid buckets and then loop through their entries.
+HashSpace is a little more complex than SortSpace but it’s still pretty simple. Instead of drawing its power from a sorting algorithm it draws its power from hash tables. HashSpace has a resolution and every entry going in is put into a grid-bucket. To check for surrounding entries you simply look up closest grid buckets and then loop through their entries.
 
 ![examples/HashSpace.png](examples/HashSpace.png)
 
@@ -47,11 +47,11 @@ QuadSpace is basically the same as "quad tree" (I just like the space theme). Qu
 
 ![examples/QuadSpace.png](examples/QuadSpace.png)
 
-QuadSpaces are really good at almost everything. But they might miss out in some niche cases where SortSpaces (really small distances) or HashSpaces (uniform density) might win out. They are also bad at cache locality as many pointers or references might make you jump all over the place.
+QuadSpaces are really good at almost everything. But they might miss out in some niche cases where SortSpaces (really small distances) or HashSpaces (uniform density) might win out. They are also bad at cache locality as many pointers or references might make you jump all over the place in memory.
 
 # KdSpace
 
-Just like QuadSpace is about Quad Trees, KdSpace is about kd-tree. Kd-Trees different from quad trees in that they are binary and they sort their results as they divide. Potentially getting less nodes and less bounds to check. Quad trees build their nodes as new elements are inserted while kd-trees build all the nodes in one big final step.
+Just like QuadSpace is about Quad Trees, KdSpace is about kd-tree. Kd-Trees differ from quad trees in that they are binary and they sort their results as they divide. Potentially getting less nodes and less bounds to check. Quad trees build their nodes as new elements are inserted while kd-trees build all the nodes in one big final step.
 
 ![examples/KdSpace.png](examples/KdSpace.png)
 
@@ -59,7 +59,7 @@ KdSpace trees take a long time to build. In theory KdSpace would be good when th
 
 # Always be profiling.
 
-You can’t really say one Space is faster than the other you always need to check. The hardware or your particular problem might drastically change the speed characteristics. This is why all spaces have a similar API and you can just swap them out when another space seems better for your use case.
+You can’t really say one Space is faster than the others, you always need to check. The hardware or your particular problem might drastically change the speed characteristics. This is why all spaces have a similar API and you can just swap them out when another space seems better for your use case.
 
 # API: spacy
 
