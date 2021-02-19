@@ -67,7 +67,6 @@ template testSpace(name: string, space: untyped) =
   for e in space.all:
     image.drawCircle(e.pos, 1, rgba(255, 255, 255, 255))
 
-
   for e in space.findInRangeApprox(at, radius):
     image.drawCircle(e.pos, 2, rgba(255, 255, 255, 255))
 

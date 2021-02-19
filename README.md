@@ -60,3 +60,383 @@ KdSpace trees take a long time to build. In theory KdSpace would be good when th
 # Always be profiling.
 
 You can’t really say one Space is faster than the other you always need to check. The hardware or your particular problem might drastically change the speed characteristics. This is why all spaces have a similar API and you can just swap them out when another space seems better for your use case.
+
+# API: spacy
+
+```nim
+import spacy
+```
+
+## **type** Entry
+
+
+```nim
+Entry = object
+ id*: uint32
+ pos*: Vec2
+```
+
+## **type** BruteSpace
+
+Brute space just compares every entry vs every other entry. Supposed to be good for very small number or large ranges.
+
+```nim
+BruteSpace = ref object
+ list*: seq[Entry]
+```
+
+## **proc** newBruteSpace
+
+
+```nim
+proc newBruteSpace(): BruteSpace
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(bs: BruteSpace; e: Entry) {.inline.}
+```
+
+## **proc** finalize
+
+
+```nim
+proc finalize(bs: BruteSpace) {.inline.}
+```
+
+## **iterator** all
+
+
+```nim
+iterator all(bs: BruteSpace): Entry
+```
+
+## **iterator** findInRange
+
+
+```nim
+iterator findInRange(bs: BruteSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** findInRangeApprox
+
+
+```nim
+iterator findInRangeApprox(bs: BruteSpace; e: Entry; maxRange: float): Entry
+```
+
+## **proc** clear
+
+
+```nim
+proc clear(bs: BruteSpace) {.inline.}
+```
+
+## **proc** len
+
+
+```nim
+proc len(bs: BruteSpace): int {.inline.}
+```
+
+## **type** SortSpace
+
+Sort space sorts all entires on one axis X. Supposed to be good for very small ranges.
+
+```nim
+SortSpace = ref object
+ list*: seq[Entry]
+```
+
+## **proc** newSortSpace
+
+
+```nim
+proc newSortSpace(): SortSpace
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(ss: SortSpace; e: Entry) {.inline.}
+```
+
+## **proc** finalize
+
+
+```nim
+proc finalize(ss: SortSpace) {.inline.}
+```
+
+## **iterator** all
+
+
+```nim
+iterator all(ss: SortSpace): Entry
+```
+
+## **iterator** findInRange
+
+
+```nim
+iterator findInRange(ss: SortSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** findInRangeApprox
+
+
+```nim
+iterator findInRangeApprox(ss: SortSpace; e: Entry; maxRange: float): Entry
+```
+
+## **proc** clear
+
+
+```nim
+proc clear(ss: SortSpace) {.inline.}
+```
+
+## **proc** len
+
+
+```nim
+proc len(ss: SortSpace): int {.inline.}
+```
+
+## **type** HashSpace
+
+Divides space into little tiles that objects are hashed too. Supposed to be good for very uniform filled space.
+
+```nim
+HashSpace = ref object
+ hash*: TableRef[(int32, int32), seq[Entry]]
+ resolution*: float
+```
+
+## **proc** newHashSpace
+
+
+```nim
+proc newHashSpace(resolution: float): HashSpace
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(hs: HashSpace; e: Entry) {.raises: [KeyError].}
+```
+
+## **iterator** all
+
+
+```nim
+iterator all(hs: HashSpace): Entry
+```
+
+## **iterator** findInRangeApprox
+
+
+```nim
+iterator findInRangeApprox(hs: HashSpace; e: Entry; maxRange: float): Entry {.raises: [KeyError].}
+```
+
+## **iterator** findInRange
+
+
+```nim
+iterator findInRange(hs: HashSpace; e: Entry; maxRange: float): Entry {.raises: [KeyError].}
+```
+
+## **proc** clear
+
+
+```nim
+proc clear(hs: HashSpace) {.inline.}
+```
+
+## **proc** finalize
+
+
+```nim
+proc finalize(hs: HashSpace) {.inline.}
+```
+
+## **proc** len
+
+
+```nim
+proc len(hs: HashSpace): int {.inline.}
+```
+
+## **type** QuadSpace
+
+QuadTree, divide each node down if there is many elements. Supposed to be for large amount of entries.
+
+```nim
+QuadSpace = ref object
+ root*: QuadNode
+ maxThings*: int
+ maxLevels*: int
+```
+
+## **type** QuadNode
+
+
+```nim
+QuadNode = ref object
+ things*: seq[Entry]
+ nodes*: seq[QuadNode]
+ bounds*: Rect
+ level*: int
+```
+
+## **proc** newQuadSpace
+
+
+```nim
+proc newQuadSpace(bounds: Rect; maxThings = 10; maxLevels = 10): QuadSpace
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(qs: QuadSpace; qn: var QuadNode; e: Entry) {.raises: [Exception], tags: [RootEffect].}
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(qs: QuadSpace; e: Entry) {.raises: [Exception], tags: [RootEffect].}
+```
+
+## **iterator** findInRangeApprox
+
+
+```nim
+iterator findInRangeApprox(qs: QuadSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** findInRange
+
+
+```nim
+iterator findInRange(qs: QuadSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** all
+
+
+```nim
+iterator all(qs: QuadSpace): Entry
+```
+
+## **proc** clear
+
+
+```nim
+proc clear(qs: QuadSpace) {.inline.}
+```
+
+## **proc** finalize
+
+
+```nim
+proc finalize(qs: QuadSpace) {.inline.}
+```
+
+## **proc** len
+
+
+```nim
+proc len(qs: QuadSpace): int {.inline.}
+```
+
+## **type** KdSpace
+
+KD-Tree, each cell is divided vertically or horizontally. Supposed to be good for large amount of entries.
+
+```nim
+KdSpace = ref object
+ root*: KdNode
+ maxThings*: int
+```
+
+## **type** KdNode
+
+
+```nim
+KdNode = ref object
+ things*: seq[Entry]
+ nodes*: seq[KdNode]
+ bounds*: Rect
+ level*: int
+```
+
+## **proc** newKdNode
+
+
+```nim
+proc newKdNode(bounds: Rect; level: int): KdNode
+```
+
+## **proc** newKdSpace
+
+
+```nim
+proc newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace
+```
+
+## **proc** insert
+
+
+```nim
+proc insert(ks: KdSpace; e: Entry) {.inline.}
+```
+
+## **proc** finalize
+
+
+```nim
+proc finalize(ks: KdSpace)
+```
+
+## **iterator** findInRangeApprox
+
+
+```nim
+iterator findInRangeApprox(ks: KdSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** findInRange
+
+
+```nim
+iterator findInRange(ks: KdSpace; e: Entry; maxRange: float): Entry
+```
+
+## **iterator** all
+
+
+```nim
+iterator all(ks: KdSpace): Entry
+```
+
+## **proc** clear
+
+
+```nim
+proc clear(ks: KdSpace) {.inline.}
+```
+
+## **proc** len
+
+
+```nim
+proc len(ks: KdSpace): int
+```
