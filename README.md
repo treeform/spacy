@@ -2,7 +2,38 @@
 
 Spatial algorithms are used to find the "closest" things faster than simple brute force iteration would. They make your code run faster using smarter data structures. This library has different "Spaces" that you can use to speed up games and graphical applications.
 
+`nimble install spacy`
+
+### Depends on:
+* vmath
+* bumpy
+
 One key design decision is that all spaces have a very similar API and can be easily swapped. This way you can swap out spaces and see which one works best for your use case.
+
+```nim
+import spacy, vmath, random
+
+var rand = initRand(2021)
+
+# Create one of the BruteSpace, SortSpace, HashSpace, QuadSpace or KdSpace.
+var space = newSortSpace()
+for i in 0 ..< 1000:
+  # All entries should have a id and pos.
+  let e = Entry(id: i.uint32, pos: rand.randVec2())
+  # Insert entries.
+  space.insert e
+# Call finalize to start using the space.
+space.finalize()
+
+# Iterate N x N entires and get the closest.
+let distance = 0.001
+for a in space.all():
+  for b in space.findInRange(a, distance):
+    echo a, " is close to ", b
+
+# Clear the space when you are done.
+space.clear()
+```
 
 ### Perf time (1000 vs 1000 at 0.001 distance):
 ```
