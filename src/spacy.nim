@@ -159,12 +159,6 @@ iterator all*(hs: HashSpace): Entry =
     for e in list:
       yield e
 
-proc overlapRectCircle(point: Vec2, radius, x, y, w, h: float): bool =
-  let
-    dx = point.x - clamp(point.x, x, x + w)
-    dy = point.y - clamp(point.y, y, y + h)
-  return (dx * dx + dy * dy) <= (radius * radius)
-
 iterator findInRangeApprox*(hs: HashSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry but does not cull them.
   ## Useful if you need distance anyways and will compute other computations.
@@ -178,8 +172,12 @@ iterator findInRangeApprox*(hs: HashSpace, e: Entry, radius: float): Entry =
       let
         rx = px + x
         ry = py + y
-      if overlapRectCircle(e.pos, radius, float(rx) * hs.resolution, float(
-          ry) * hs.resolution, hs.resolution, hs.resolution):
+      if circle(e.pos, radius).overlaps(rect(
+          float(rx) * hs.resolution,
+          float(ry) * hs.resolution,
+          hs.resolution,
+          hs.resolution
+        )):
         let posKey = (int32 rx, int32 ry)
         if posKey in hs.hash:
           for thing in hs.hash[posKey]:
@@ -300,10 +298,6 @@ iterator all*(qs: QuadSpace): Entry =
       for e in qs.things:
         yield e
 
-proc overlaps(qs: QuadNode, e: Entry, radius: float): bool =
-  return overlapRectCircle(e.pos, radius, qs.bounds.x, qs.bounds.y,
-      qs.bounds.w, qs.bounds.h)
-
 iterator findInRangeApprox*(qs: QuadSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry but does not cull them.
   ## Useful if you need distance anyways and will compute other computations.
@@ -312,7 +306,7 @@ iterator findInRangeApprox*(qs: QuadSpace, e: Entry, radius: float): Entry =
     var qs = nodes.pop()
     if qs.nodes.len == 4:
       for node in qs.nodes:
-        if node.overlaps(e, radius):
+        if circle(e.pos, radius).overlaps(node.bounds):
           nodes.add(node)
     else:
       for e in qs.things:
@@ -414,10 +408,6 @@ iterator all*(ks: KdSpace): Entry =
       for e in kn.things:
         yield e
 
-proc overlaps(kn: KdNode, e: Entry, radius: float): bool =
-  return overlapRectCircle(e.pos, radius, kn.bounds.x, kn.bounds.y,
-      kn.bounds.w, kn.bounds.h)
-
 iterator findInRangeApprox*(ks: KdSpace, e: Entry, radius: float): Entry =
   ## Iterates all entries in range of an entry but does not cull them.
   ## Useful if you need distance anyways and will compute other computations.
@@ -426,7 +416,7 @@ iterator findInRangeApprox*(ks: KdSpace, e: Entry, radius: float): Entry =
     var kn = nodes.pop()
     if kn.nodes.len == 2:
       for node in kn.nodes:
-        if node.overlaps(e, radius):
+        if circle(e.pos, radius).overlaps(node.bounds):
           nodes.add(node)
     else:
       for e in kn.things:
