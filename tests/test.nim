@@ -1,5 +1,12 @@
 import bumpy, random, spacy, vmath
 
+randomize(2021)
+
+proc randVec2*(r: var Rand): Vec2 =
+  let a = r.rand(PI * 2)
+  let v = r.rand(1.0)
+  vec2(cos(a) * v, sin(a) * v)
+
 template testSpace(name: string, space: untyped) =
   let a = Entry(id: 1, pos: vec2(0, 0))
   space.insert a
