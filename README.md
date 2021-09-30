@@ -1,14 +1,14 @@
 # Spatial data structures for Nim.
 
-![Github Actions](https://github.com/treeform/spacy/workflows/Github%20Actions/badge.svg)
-
-Spatial algorithms are used to find the "closest" things faster than simple brute force iteration would. They make your code run faster using smarter data structures. This library has different "Spaces" that you can use to speed up games and graphical applications.
-
 `nimble install spacy`
 
-### Depends on:
-* vmath
-* bumpy
+![Github Actions](https://github.com/treeform/spacy/workflows/Github%20Actions/badge.svg)
+
+[API reference](https://nimdocs.com/treeform/spacy)
+
+## About
+
+Spatial algorithms are used to find the "closest" things faster than simple brute force iteration would. They make your code run faster using smarter data structures. This library has different "Spaces" that you can use to speed up games and graphical applications.
 
 One key design decision is that all spaces have a very similar API and can be easily swapped. This way you can swap out spaces and see which one works best for your use case.
 

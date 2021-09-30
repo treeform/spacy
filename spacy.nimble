@@ -1,5 +1,5 @@
 version     = "0.0.4"
-author      = "Spacy"
+author      = "Andre von Houck"
 description = "Spatial data structures for Nim."
 license     = "MIT"
 
