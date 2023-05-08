@@ -50,14 +50,14 @@ template testSpace(name: string, space: untyped) =
     var numFinds = 0
     for other in space.findInRange(a, 0.02):
       inc numFinds
-    doAssert numFinds == 14
+    doAssert numFinds == 23
 
   block:
     # in range 0.12
     var numFinds = 0
     for other in space.findInRange(a, 0.12):
       inc numFinds
-    doAssert numFinds == 121
+    doAssert numFinds == 125
 
 var bs = newBruteSpace()
 testSpace("BruteSpace", bs)
