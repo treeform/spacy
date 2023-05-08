@@ -7,4 +7,4 @@ srcDir = "src"
 
 requires "nim >= 1.4.0"
 requires "vmath >= 1.1.4"
-requires "bumpy >= 1.1.0"
+requires "bumpy >= 1.1.1"
