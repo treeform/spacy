@@ -1,0 +1,49 @@
+Entry	spacy.html#Entry	spacy: Entry	
+BruteSpace	spacy.html#BruteSpace	spacy: BruteSpace	
+newBruteSpace	spacy.html#newBruteSpace	spacy: newBruteSpace(): BruteSpace	
+insert	spacy.html#insert,BruteSpace,Entry	spacy: insert(bs: BruteSpace; e: Entry)	
+finalize	spacy.html#finalize,BruteSpace	spacy: finalize(bs: BruteSpace)	
+clear	spacy.html#clear,BruteSpace	spacy: clear(bs: BruteSpace)	
+len	spacy.html#len,BruteSpace	spacy: len(bs: BruteSpace): int	
+all	spacy.html#all.i,BruteSpace	spacy: all(bs: BruteSpace): Entry	
+findInRangeApprox	spacy.html#findInRangeApprox.i,BruteSpace,Entry,float	spacy: findInRangeApprox(bs: BruteSpace; e: Entry; radius: float): Entry	
+findInRange	spacy.html#findInRange.i,BruteSpace,Entry,float	spacy: findInRange(bs: BruteSpace; e: Entry; radius: float): Entry	
+SortSpace	spacy.html#SortSpace	spacy: SortSpace	
+newSortSpace	spacy.html#newSortSpace	spacy: newSortSpace(): SortSpace	
+insert	spacy.html#insert,SortSpace,Entry	spacy: insert(ss: SortSpace; e: Entry)	
+finalize	spacy.html#finalize,SortSpace	spacy: finalize(ss: SortSpace)	
+clear	spacy.html#clear,SortSpace	spacy: clear(ss: SortSpace)	
+len	spacy.html#len,SortSpace	spacy: len(ss: SortSpace): int	
+all	spacy.html#all.i,SortSpace	spacy: all(ss: SortSpace): Entry	
+findInRangeApprox	spacy.html#findInRangeApprox.i,SortSpace,Entry,float	spacy: findInRangeApprox(ss: SortSpace; e: Entry; radius: float): Entry	
+findInRange	spacy.html#findInRange.i,SortSpace,Entry,float	spacy: findInRange(ss: SortSpace; e: Entry; radius: float): Entry	
+HashSpace	spacy.html#HashSpace	spacy: HashSpace	
+newHashSpace	spacy.html#newHashSpace,float	spacy: newHashSpace(resolution: float): HashSpace	
+insert	spacy.html#insert,HashSpace,Entry	spacy: insert(hs: HashSpace; e: Entry)	
+finalize	spacy.html#finalize,HashSpace	spacy: finalize(hs: HashSpace)	
+clear	spacy.html#clear,HashSpace	spacy: clear(hs: HashSpace)	
+len	spacy.html#len,HashSpace	spacy: len(hs: HashSpace): int	
+all	spacy.html#all.i,HashSpace	spacy: all(hs: HashSpace): Entry	
+findInRangeApprox	spacy.html#findInRangeApprox.i,HashSpace,Entry,float	spacy: findInRangeApprox(hs: HashSpace; e: Entry; radius: float): Entry	
+findInRange	spacy.html#findInRange.i,HashSpace,Entry,float	spacy: findInRange(hs: HashSpace; e: Entry; radius: float): Entry	
+QuadSpace	spacy.html#QuadSpace	spacy: QuadSpace	
+QuadNode	spacy.html#QuadNode	spacy: QuadNode	
+newQuadSpace	spacy.html#newQuadSpace,Rect,int,int	spacy: newQuadSpace(bounds: Rect; maxThings = 10; maxLevels = 10): QuadSpace	
+insert	spacy.html#insert,QuadSpace,QuadNode,Entry	spacy: insert(qs: QuadSpace; qn: var QuadNode; e: Entry)	
+insert	spacy.html#insert,QuadSpace,Entry	spacy: insert(qs: QuadSpace; e: Entry)	
+finalize	spacy.html#finalize,QuadSpace	spacy: finalize(qs: QuadSpace)	
+clear	spacy.html#clear,QuadSpace	spacy: clear(qs: QuadSpace)	
+len	spacy.html#len,QuadSpace	spacy: len(qs: QuadSpace): int	
+all	spacy.html#all.i,QuadSpace	spacy: all(qs: QuadSpace): Entry	
+findInRangeApprox	spacy.html#findInRangeApprox.i,QuadSpace,Entry,float	spacy: findInRangeApprox(qs: QuadSpace; e: Entry; radius: float): Entry	
+findInRange	spacy.html#findInRange.i,QuadSpace,Entry,float	spacy: findInRange(qs: QuadSpace; e: Entry; radius: float): Entry	
+KdSpace	spacy.html#KdSpace	spacy: KdSpace	
+KdNode	spacy.html#KdNode	spacy: KdNode	
+newKdSpace	spacy.html#newKdSpace,Rect,int,int	spacy: newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace	
+insert	spacy.html#insert,KdSpace,Entry	spacy: insert(ks: KdSpace; e: Entry)	
+finalize	spacy.html#finalize,KdSpace	spacy: finalize(ks: KdSpace)	
+clear	spacy.html#clear,KdSpace	spacy: clear(ks: KdSpace)	
+len	spacy.html#len,KdSpace	spacy: len(ks: KdSpace): int	
+all	spacy.html#all.i,KdSpace	spacy: all(ks: KdSpace): Entry	
+findInRangeApprox	spacy.html#findInRangeApprox.i,KdSpace,Entry,float	spacy: findInRangeApprox(ks: KdSpace; e: Entry; radius: float): Entry	
+findInRange	spacy.html#findInRange.i,KdSpace,Entry,float	spacy: findInRange(ks: KdSpace; e: Entry; radius: float): Entry	
