@@ -4,7 +4,7 @@
 
 ![Github Actions](https://github.com/treeform/spacy/workflows/Github%20Actions/badge.svg)
 
-[API reference](https://nimdocs.com/treeform/spacy)
+[API reference](https://treeform.github.io/spacy)
 
 ## About
 
