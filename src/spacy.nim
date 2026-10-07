@@ -164,14 +164,13 @@ iterator findInRangeApprox*(hs: HashSpace, e: Entry, radius: float): Entry =
   ## Useful if you need distance anyways and will compute other computations.
   let
     d = int(radius / hs.resolution) + 1
-    px = int(e.pos.x / hs.resolution)
-    py = int(e.pos.y / hs.resolution)
+    key = hs.hashSpaceKey(e)
 
   for x in -d .. d:
     for y in -d .. d:
       let
-        rx = px + x
-        ry = py + y
+        rx = int(key[0]) + x
+        ry = int(key[1]) + y
       if circle(e.pos, radius).overlaps(rect(
           float(rx) * hs.resolution,
           float(ry) * hs.resolution,
