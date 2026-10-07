@@ -26,28 +26,28 @@ nim	clear	spacy.html#clear,HashSpace	proc clear(hs: HashSpace)		147
 nim	len	spacy.html#len,HashSpace	proc len(hs: HashSpace): int		151
 nim	all	spacy.html#all.i,HashSpace	iterator all(hs: HashSpace): Entry		156
 nim	findInRangeApprox	spacy.html#findInRangeApprox.i,HashSpace,Entry,float	iterator findInRangeApprox(hs: HashSpace; e: Entry; radius: float): Entry		162
-nim	findInRange	spacy.html#findInRange.i,HashSpace,Entry,float	iterator findInRange(hs: HashSpace; e: Entry; radius: float): Entry		187
-nim	QuadSpace	spacy.html#QuadSpace	type QuadSpace		195
-nim	QuadNode	spacy.html#QuadNode	type QuadNode		202
-nim	newQuadSpace	spacy.html#newQuadSpace,Rect,int,int	proc newQuadSpace(bounds: Rect; maxThings = 10; maxLevels = 10): QuadSpace		213
-nim	insert	spacy.html#insert,QuadSpace,Entry	proc insert(qs: QuadSpace; e: Entry)		220
-nim	insert	spacy.html#insert,QuadSpace,QuadNode,Entry	proc insert(qs: QuadSpace; qn: var QuadNode; e: Entry)		221
-nim	finalize	spacy.html#finalize,QuadSpace	proc finalize(qs: QuadSpace)		269
-nim	clear	spacy.html#clear,QuadSpace	proc clear(qs: QuadSpace)		273
-nim	len	spacy.html#len,QuadSpace	proc len(qs: QuadSpace): int		278
-nim	all	spacy.html#all.i,QuadSpace	iterator all(qs: QuadSpace): Entry		289
-nim	findInRangeApprox	spacy.html#findInRangeApprox.i,QuadSpace,Entry,float	iterator findInRangeApprox(qs: QuadSpace; e: Entry; radius: float): Entry		301
-nim	findInRange	spacy.html#findInRange.i,QuadSpace,Entry,float	iterator findInRange(qs: QuadSpace; e: Entry; radius: float): Entry		315
-nim	KdSpace	spacy.html#KdSpace	type KdSpace		323
-nim	KdNode	spacy.html#KdNode	type KdNode		329
-nim	newKdSpace	spacy.html#newKdSpace,Rect,int,int	proc newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace		340
-nim	insert	spacy.html#insert,KdSpace,Entry	proc insert(ks: KdSpace; e: Entry)		346
-nim	finalize	spacy.html#finalize,KdSpace	proc finalize(ks: KdSpace)		379
-nim	clear	spacy.html#clear,KdSpace	proc clear(ks: KdSpace)		383
-nim	len	spacy.html#len,KdSpace	proc len(ks: KdSpace): int		388
-nim	all	spacy.html#all.i,KdSpace	iterator all(ks: KdSpace): Entry		399
-nim	findInRangeApprox	spacy.html#findInRangeApprox.i,KdSpace,Entry,float	iterator findInRangeApprox(ks: KdSpace; e: Entry; radius: float): Entry		411
-nim	findInRange	spacy.html#findInRange.i,KdSpace,Entry,float	iterator findInRange(ks: KdSpace; e: Entry; radius: float): Entry		425
+nim	findInRange	spacy.html#findInRange.i,HashSpace,Entry,float	iterator findInRange(hs: HashSpace; e: Entry; radius: float): Entry		186
+nim	QuadSpace	spacy.html#QuadSpace	type QuadSpace		194
+nim	QuadNode	spacy.html#QuadNode	type QuadNode		201
+nim	newQuadSpace	spacy.html#newQuadSpace,Rect,int,int	proc newQuadSpace(bounds: Rect; maxThings = 10; maxLevels = 10): QuadSpace		212
+nim	insert	spacy.html#insert,QuadSpace,Entry	proc insert(qs: QuadSpace; e: Entry)		219
+nim	insert	spacy.html#insert,QuadSpace,QuadNode,Entry	proc insert(qs: QuadSpace; qn: var QuadNode; e: Entry)		220
+nim	finalize	spacy.html#finalize,QuadSpace	proc finalize(qs: QuadSpace)		268
+nim	clear	spacy.html#clear,QuadSpace	proc clear(qs: QuadSpace)		272
+nim	len	spacy.html#len,QuadSpace	proc len(qs: QuadSpace): int		277
+nim	all	spacy.html#all.i,QuadSpace	iterator all(qs: QuadSpace): Entry		288
+nim	findInRangeApprox	spacy.html#findInRangeApprox.i,QuadSpace,Entry,float	iterator findInRangeApprox(qs: QuadSpace; e: Entry; radius: float): Entry		300
+nim	findInRange	spacy.html#findInRange.i,QuadSpace,Entry,float	iterator findInRange(qs: QuadSpace; e: Entry; radius: float): Entry		314
+nim	KdSpace	spacy.html#KdSpace	type KdSpace		322
+nim	KdNode	spacy.html#KdNode	type KdNode		328
+nim	newKdSpace	spacy.html#newKdSpace,Rect,int,int	proc newKdSpace(bounds: Rect; maxThings = 10; maxLevels = 10): KdSpace		339
+nim	insert	spacy.html#insert,KdSpace,Entry	proc insert(ks: KdSpace; e: Entry)		345
+nim	finalize	spacy.html#finalize,KdSpace	proc finalize(ks: KdSpace)		378
+nim	clear	spacy.html#clear,KdSpace	proc clear(ks: KdSpace)		382
+nim	len	spacy.html#len,KdSpace	proc len(ks: KdSpace): int		387
+nim	all	spacy.html#all.i,KdSpace	iterator all(ks: KdSpace): Entry		398
+nim	findInRangeApprox	spacy.html#findInRangeApprox.i,KdSpace,Entry,float	iterator findInRangeApprox(ks: KdSpace; e: Entry; radius: float): Entry		410
+nim	findInRange	spacy.html#findInRange.i,KdSpace,Entry,float	iterator findInRange(ks: KdSpace; e: Entry; radius: float): Entry		424
 nimgrp	finalize	spacy.html#finalize-procs-all	proc		21
 nimgrp	clear	spacy.html#clear-procs-all	proc		25
 nimgrp	len	spacy.html#len-procs-all	proc		29
