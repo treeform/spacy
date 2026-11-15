@@ -1,5 +1,12 @@
 import pixie, random, spacy, strformat, tables, times, vmath
 
+proc randVec2(r: var Rand): Vec2 =
+  ## Samples a point using a random angle and radius.
+  let
+    angle = r.rand(PI * 2)
+    radius = r.rand(1.0)
+  vec2(cos(angle) * radius, sin(angle) * radius)
+
 let radius = 100.0
 
 proc strokeCircle*(
@@ -8,22 +15,42 @@ proc strokeCircle*(
   radius: float32,
   color: ColorRGBA,
   strokeWidth: float32 = 1.0,
-  blendMode = bmNormal
+  blendMode = NormalBlend
 ) =
-  var path: Path
+  ## Strokes a circle using Pixie's path API.
+  let path = newPath()
   path.ellipse(center, radius, radius)
-  image.strokePath(path, color, blendMode=blendMode, strokeWidth=strokeWidth)
+  let paint = newPaint(SolidPaint)
+  paint.color = color.color()
+  paint.blendMode = blendMode
+  image.strokePath(path, paint, strokeWidth = strokeWidth)
 
 proc strokeRect*(
   image: Image,
   rect: Rect,
   color: ColorRGBA,
   strokeWidth: float32 = 1.0,
-  blendMode = bmNormal
+  blendMode = NormalBlend
 ) =
-  var path: Path
+  ## Strokes a rectangle using Pixie's path API.
+  let path = newPath()
   path.rect(rect)
-  image.strokePath(path, color, blendMode=blendMode, strokeWidth=strokeWidth)
+  let paint = newPaint(SolidPaint)
+  paint.color = color.color()
+  paint.blendMode = blendMode
+  image.strokePath(path, paint, strokeWidth = strokeWidth)
+
+proc drawCircle(image: Image, center: Vec2, radius: float32, color: ColorRGBA) =
+  ## Fills a circle using Pixie's path API.
+  let path = newPath()
+  path.ellipse(center, radius, radius)
+  image.fillPath(path, color)
+
+proc drawRect(image: Image, bounds: Rect, color: ColorRGBA) =
+  ## Fills a rectangle using Pixie's path API.
+  let path = newPath()
+  path.rect(bounds)
+  image.fillPath(path, color)
 
 proc drawInternal(image: Image, bs: BruteSpace, at: Entry) =
   discard
@@ -31,16 +58,16 @@ proc drawInternal(image: Image, bs: BruteSpace, at: Entry) =
 proc drawInternal(image: Image, ss: SortSpace, at: Entry) =
   image.drawRect(
     rect(at.pos.x - radius, 0, radius*2, 1000),
-    rgba(255, 255, 255, 25).toPremultipliedAlpha()
+    rgba(255, 255, 255, 25)
   )
 
 proc drawInternal(image: Image, qn: QuadNode, at: Entry) =
   for node in qn.nodes:
     let b = node.bounds
     if node.nodes.len == 0 and overlaps(circle(at.pos, radius), b):
-      image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.drawRect(b, rgba(255, 255, 255, 25))
     else:
-      image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.strokeRect(b, rgba(255, 255, 255, 25))
     image.drawInternal(node, at)
 
 proc drawInternal(image: Image, qs: QuadSpace, at: Entry) =
@@ -50,9 +77,9 @@ proc drawInternal(image: Image, kn: KdNode, at: Entry) =
   for node in kn.nodes:
     let b = node.bounds
     if node.nodes.len == 0 and overlaps(circle(at.pos, radius), b):
-      image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.drawRect(b, rgba(255, 255, 255, 25))
     else:
-      image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.strokeRect(b, rgba(255, 255, 255, 25))
 
     image.drawInternal(node, at)
 
@@ -64,9 +91,9 @@ proc drawInternal(image: Image, hs: HashSpace, at: Entry) =
   for key in hs.hash.keys:
     let b = rect(float32(key[0])*r, float32(key[1])*r, r, r)
     if overlaps(circle(at.pos, radius), b):
-      image.drawRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.drawRect(b, rgba(255, 255, 255, 25))
     else:
-      image.strokeRect(b, rgba(255, 255, 255, 25).toPremultipliedAlpha())
+      image.strokeRect(b, rgba(255, 255, 255, 25))
 
 template testSpace(name: string, space: untyped) =
   echo "---------------- ", name
