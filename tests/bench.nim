@@ -1,5 +1,12 @@
 import benchy, bumpy, random, spacy, vmath
 
+proc randVec2(r: var Rand): Vec2 =
+  ## Samples a point using a random angle and radius.
+  let
+    angle = r.rand(PI * 2)
+    radius = r.rand(1.0)
+  vec2(cos(angle) * radius, sin(angle) * radius)
+
 proc makeEntries(num: int): seq[Entry] =
   var rand = initRand(1988)
   for i in 0 ..< num:

@@ -1,5 +1,12 @@
 import spacy, vmath, random
 
+proc randVec2(r: var Rand): Vec2 =
+  ## Samples a point using a random angle and radius.
+  let
+    angle = r.rand(PI * 2)
+    radius = r.rand(1.0)
+  vec2(cos(angle) * radius, sin(angle) * radius)
+
 var rand = initRand(2021)
 
 # Create one of the BruteSpace, SortSpace, HashSpace, QuadSpace or KdSpace.
